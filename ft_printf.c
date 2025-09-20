@@ -1,16 +1,24 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_printf.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hrahal <hrahal@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/20 11:12:34 by hrahal            #+#    #+#             */
+/*   Updated: 2025/09/20 19:04:22 by hrahal           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_printf.h"
-#include <stdio.h>
 
 static int	case_check(const char *fmt, int count, va_list list)
 {
-	int	i;
-
-	i = 0;
 	if (*fmt == 'c')
 		count += ft_putchar(va_arg(list, int));
 	else if (*fmt == 's')
 		count += ft_putstr(va_arg(list, char *));
-	else if (*fmt == 'd' || fmt[i] == 'i')
+	else if (*fmt == 'd' || *fmt == 'i')
 		count += ft_putnbr(va_arg(list, int));
 	else if (*fmt == 'u')
 		count += ft_putnbr_unsigned(va_arg(list, unsigned int));
@@ -38,8 +46,7 @@ int	ft_printf(const char *fmt, ...)
 	{
 		while (fmt[i] != '%' && fmt[i] != '\0')
 		{
-			write(1, &fmt[i], 1);
-			count++;
+			count += write(1, &fmt[i], 1);
 			i++;
 		}
 		if (fmt[i] == '\0')
@@ -55,31 +62,42 @@ int	ft_printf(const char *fmt, ...)
 	return (count);
 }
 
-//#include <stdio.h>
+#include <stdio.h> // CHECK FOR NULL TESTINGGGGGG
 
-// int	main(void)
-// {
-//     // int my_len = ft_printf("%c\n%c\n%c\n%s\n%s\n%s\n%d\n%d\n%i\n%i\n",'a','a','a', "one","two","three",22,55,0,1);
-//     // int og_len = printf("%c\n%c\n%c\n%s\n%s\n%s\n%d\n%d\n%i\n%i\n",'a','a','a', "one","two","three",22,55,0,1);
-//     // printf("my len: %d\n", my_len);
-//     // // printf("org len: %d\n", og_len);
+int	main(void)
+{
+    // int my_len = ft_printf("%c\n%c\n%c\n%s\n%s\n%s\n%d\n%d\n%i\n%i\n",'a','a','a', "one","two","three",22,55,0,1);
+	// printf("-----------------------------------\n");
+    // int og_len = printf("%c\n%c\n%c\n%s\n%s\n%s\n%d\n%d\n%i\n%i\n",'a','a','a', "one","two","three",22,55,0,1);
+	// printf("-----------------------------------\n");
+    // printf("my len: %d\n", my_len);
+	// printf("org len: %d\n", og_len);
 
-//     // int my_len = ft_printf("%X\n%X\n%X\n", 45555556, 6698986, 10006980);
-//     // int og_len = printf("%X\n%X\n%X\n", 45555556, 6698986, 10006980);
+    // int my_len = ft_printf("%X\n%X\n%X\n", 45555556, 6698986, 10006980);
+	// printf("-----------------------------------\n");
+    // int og_len = printf("%X\n%X\n%X\n", 45555556, 6698986, 10006980);
+	// printf("-----------------------------------\n");
+    // printf("my len: %d\n", my_len);
+    // printf("og len: %d\n", og_len);
 
-//     // printf("my len: %d\n", my_len);
-//     // printf("og len: %d\n", og_len);
+	// int x = 24;
+	// int *ptr = &x;
+	// int my_len = ft_printf("%p\n", ptr);
+	// printf("-----------------------------------\n");
+	// int og_len = printf("%p\n", ptr);
+	// printf("-----------------------------------\n");
+	// printf("my len: %d\n", my_len);
+	// printf("og len: %d\n", og_len);
 
-// 	// int x = 24;
-// 	// int *ptr = &x;
-// 	// int my_len = ft_printf("%p\n", ptr);
-// 	// int og_len = printf("%p\n", ptr);
-// 	// printf("my len: %d\n", my_len);
-// 	// printf("og len: %d\n", og_len);
+	// int len1 = ft_printf("5%%\n6%%\n");
+	// printf("-----------------------------------\n");
+	// int len2 = printf("5%%\n6%%\n");
+	// printf("-----------------------------------\n");
+	// printf("len1: %d\n", len1);
+	// printf("len2: %d\n", len2);
+	// return (0);
+	ft_printf("%s\n", NULL);
+	printf("%s", NULL);
+// NULL TESTINGGGGG: DONT FORGETTTTTTTT
 
-// 	// int len1 = ft_printf("5%%\n6%%\n");
-// 	// int len2 = printf("5%%\n6%%\n");
-// 	// printf("%d\n", len1);
-// 	// printf("%d\n", len2);
-// 	return (0);
-// }
+}
