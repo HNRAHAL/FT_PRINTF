@@ -8,20 +8,12 @@ int	ft_putchar(char c)
 char	*ft_putstr(char *s)
 {
 	int	i;
-	int	count;
-	int	res;
-
-	count = 0;
-	res = 0;
 	i = 0;
 	if (!s)
 		s = "(null)";
 	while (s[i])
 	{
-		res = write(1, &s[i], 1);
-		if (res == -1)
-			return (NULL);
-		count += res;
+		write(1, &s[i], 1);
 		i++;
 	}
 	return (s);
