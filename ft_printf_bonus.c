@@ -44,6 +44,7 @@ int	ft_printf(const char *fmt, ...)
 	va_list	list;
 
 	int i, count, flag_nbr, width_nbr, percision_nbr;
+    percision_nbr = 0;
 	count = 0;
 	width_nbr = 0;
 	va_start(list, fmt);
@@ -97,22 +98,38 @@ int	ft_printf(const char *fmt, ...)
 				int j = 0;
 				char *str = va_arg(list, char *);
 				int len = ft_strlen(str);
-				if(flag_nbr == 2 && percision_nbr != 0 && width_nbr != 0)
-				{
-					while(str[j] && j < percision_nbr)
+ 
+                if(flag_nbr == 2 && width_nbr != 0 && percision_nbr != 0 && percision_nbr <= len)
+                {
+                    while(str[j] && j < percision_nbr)
+                        count += write(1, &str[j++], 1);
+                    if(width_nbr <= percision_nbr)
+                        width_nbr = 0;
+                    else
+                        width_nbr -= percision_nbr;
+                    while(width_nbr-- > 0)
+                        count += ft_putchar(' ');
+                }
+                else if((width_nbr != 0 && percision_nbr != 0 && percision_nbr <= len))
+                { 
+                    if(width_nbr <= percision_nbr)
+                        width_nbr = 0;
+                    else
+                        width_nbr -= percision_nbr;
+                    while(width_nbr-- > 0)
+                        count += ft_putchar(' ');
+                    while(str[j] && j < percision_nbr)
+                        count += write(1, &str[j++], 1);
+                }
+                else if(flag_nbr == 2 && width_nbr != 0 && width_nbr > len)
+                {
+                    width_nbr -= len;
+                    while(str[j])
 						count += write(1, &str[j++], 1);
-					while(width_nbr-- > 0)
-						count += ft_putchar(' ');
-				}
-				else if(percision_nbr != 0 && percision_nbr < len && width_nbr != 0)
-				{
-					width_nbr -= percision_nbr;
-					while(width_nbr-- > 0)
-						count += ft_putchar(' ');
-					while(str[j] && j < percision_nbr)
-						count += write(1, &str[j++], 1);
-				}
-				else if(width_nbr != 0 && width_nbr > len)
+                    while (width_nbr-- > 0)
+                        count += ft_putchar(' ');
+                }
+				else if((width_nbr != 0 && width_nbr > len ))
 				{
 					width_nbr -= len;
 					while(width_nbr-- > 0)
@@ -121,11 +138,16 @@ int	ft_printf(const char *fmt, ...)
 						write(1, &str[j++], 1);
 					count += len;
 				}
-				else
-				{
-					ft_putstr(str);
-					count += len;
-				}
+                else if(width_nbr == 0 && percision_nbr >= 0 && percision_nbr <=len)
+                {
+                    while(str[j] && j < percision_nbr)
+                        count += write(1, &str[j++], 1);
+                }
+                else
+                {
+                    ft_putstr(str);
+                    count += len;
+                }
 				i++;
 			}
         }
@@ -154,46 +176,9 @@ int	main(void)
 	// printf("%d\n", len1);
 
 
-	char *str = "yelloww and blueee";
-	int len1 = ft_printf("|%-10.2s|\n", str);
-	int len2 = printf("|%-10.2s|\n", str);
+	char *str = "yelukmnsdjknvskjdnckjdsnckjdsncnkjcndskjcndseee";
+	int len1 = ft_printf("|%1.20s|\n", str);
+	int len2 = printf("|%1.20s|\n", str);
 	printf("%d\n", len1);
 	printf("%d\n", len2);
 }
-
-// else if(fmt[i] == 's')
-// {
-//     char *str = va_arg(list, char *);
-//     int j = 0;
-//     int temp;
-//     if(percision_nbr != 0)
-//     {
-//         temp = width_nbr;
-//         temp-= percision_nbr;
-//         while(percision_nbr-- > 0 && str[j])
-//             write(1,&str[j++], 1);
-//     }
-//     if(minus_flag == 1 && width_nbr != 0
-// && width_nbr > ft_strlen(str))
-//     {
-//         ft_putstr(str);
-//         count += ft_strlen(str);
-//         width_nbr -= ft_strlen(str);
-//         while(width_nbr-- > 0)
-//             count += ft_putchar(' ');
-//     }
-//     else if(width_nbr != 0 && width_nbr > ft_strlen(str))
-//     {
-//         width_nbr -= ft_strlen(str);
-//         while(width_nbr-- > 0)
-//             count += ft_putchar(' ');
-//         ft_putstr(str);
-//         count += ft_strlen(str);
-//     }
-//     else
-//     {
-//         ft_putstr(str);
-//         count += ft_strlen(str);
-//     }
-//     i++;
-// }
