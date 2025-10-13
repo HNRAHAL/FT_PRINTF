@@ -124,148 +124,54 @@ int	char_case_check(char c, t_format *flg, int w_nbr)
 /*----------------------------------------------------------------------------------------------*/
 /* format string %d and %i*/
 /*----------------------------------------------------------------------------------------------*/
-void sign_check(int num, t_format *flg)
+int padding_option(t_format *flg, int w_nbr, int num)
 {
-	if((flg->plus_flag && flg->minus_flag )||(flg->plus_flag && flg->zero_flag))
-	{
-		if(num >= 0)
-			ft_putchar('+');
-	}
-	else if((flg->minus_flag && flg->space_flag)||(flg->zero_flag && flg->space_flag))
-	{
-		if(num >= 0)
-			ft_putchar(' ');
-	}
-}
-
-int padding_option(t_format *flg, int w_nbr, int *num)
-{
-	int count;
+	int count; 
 	count = 0;
-
-	if((flg->plus_flag && flg->minus_flag )||(flg->minus_flag && flg->space_flag))
+	if((flg->space_flag || flg->minus_flag || flg->plus_flag ))
 	{
-		while ((w_nbr)-- > 0)
+		while(--w_nbr > 0)
 			count += ft_putchar(' ');
 	}
-	else if((flg->plus_flag && flg->zero_flag) || (flg->zero_flag && flg->space_flag))
+	else if(flg->zero_flag && !flg->minus_flag)
 	{
-		if(*num < 0)
+		while(--w_nbr > 0)
+			count += ft_putchar('0');
+	}
+	return count;
+}
+void sign_check(t_format *flg, int *num, int *w_nbr, int *count)
+{
+	if(flg->plus_flag)
+	{
+		if(*num >= 0)
+			ft_putchar('+');
+		else
 		{
 			*num *= -1;
 			ft_putchar('-');
-		}	
-		while ((w_nbr)-- > 0)
-			count += ft_putchar('0');
-	}
-	else
-	{
-		while(w_nbr-- > 0)
-		count += ft_putchar(' ');		
-	}
-	return count;
-}
-// int else_case_number(t_format *flg, int num, int len, int w_nbr)
-// {
-// 	if(flg->zero_flag)
-// 	{
-// 		if(num < 0)
-// 		{
-// 			num *= -1;
-// 			ft_putchar('-');
-// 		}
-// 		else
-// 		{
-// 			w_nbr++;
-// 			count--;
-// 		}
-
-// 		while(w_nbr-- > 0)
-// 			count += ft_putchar('0');
-// 		ft_putnbr(num);
-// 		count += len;
-// 	}
-// 	else if(flg->space_flag)
-// 	{
-// 		if(num >= 0)
-// 			ft_putchar(' ');
-// 		while(w_nbr-- > 0)
-// 			count += ft_putchar(' ');
-// 		ft_putnbr(num);
-// 		count += len;
-// 	}
-// }
-int number_case_check_one(int w_nbr, int num, int len, t_format *flg, int count)
-{
-	w_nbr -= len + 1;
-	if((flg->plus_flag && flg->minus_flag)||(flg->minus_flag && flg->space_flag))// correct
-	{
-		sign_check(num, flg);
-		ft_putnbr(num);
-		count += padding_option(flg, w_nbr, &num) + len;
-	}
-	else if((flg->plus_flag && flg->zero_flag)||(flg->zero_flag && flg->space_flag))// correct
-	{
-		sign_check(num, flg);
-		count += padding_option(flg, w_nbr, &num) + len;
-		ft_putnbr(num);
-	}
-	else if(flg->plus_flag && flg->space_flag || flg->plus_flag)
-	{
-		while(w_nbr-- > 0)
-			count += ft_putchar(' ');
-		if(num >= 0)
-			ft_putchar('+');
-		ft_putnbr(num);
-		count += len;
-	}
-	else if(flg->zero_flag && flg->minus_flag || flg->minus_flag)
-	{
-		if(num >= 0)
-		{
-			count--;
-			w_nbr++;
 		}
-		ft_putnbr(num);
-		count += len;
-		while(w_nbr-- > 0)
-			count += ft_putchar(' ');
-	}
-	else if(flg->zero_flag)
-	{
-		if(num < 0)
-		{
-			num *= -1;
-			ft_putchar('-');
-		}
-		else
-		{
-			w_nbr++;
-			count--;
-		}
-
-		while(w_nbr-- > 0)
-			count += ft_putchar('0');
-		ft_putnbr(num);
-		count += len;
 	}
 	else if(flg->space_flag)
 	{
-		if(num >= 0)
-			ft_putchar(' ');
-		while(w_nbr-- > 0)
-			count += ft_putchar(' ');
-		ft_putnbr(num);
-		count += len;
+		if(*num >= 0)
+				ft_putchar(' ');
+		else
+		{
+			*num *= -1;
+			ft_putchar('-');
+		}
 	}
-	else
+	else if(( flg->minus_flag )||( flg->zero_flag ))
 	{
-		if(num >= 0)
-			ft_putchar(' ');
-		count += padding_option(flg, w_nbr, &num) + len;
-		ft_putnbr(num);
+		if(*num >= 0)
+			(*w_nbr)++;
+		else
+		{
+			*num *= -1;
+			*count += ft_putchar('-');
+		}
 	}
-	return count;
 }
 /*----------------------------------------------------------------------------------------------*/
 
@@ -327,12 +233,48 @@ int	ft_printf(const char *fmt, ...)
 					count += len;
 				}
 			}
-			else if (fmt[i] == 'd')
+			else if (fmt[i] == 'd') //create a function that deals with the positives and negatives of each condition
 			{
 				num = va_arg(list, int);
 				len = num_len(num);
 				if(w_nbr > len && w_nbr != -1)
-					count += number_case_check_one(w_nbr, num, len, &flg, count);
+				{
+					w_nbr -= len;
+					if(flg.minus_flag||flg.plus_flag && flg.minus_flag||flg.minus_flag && flg.space_flag)
+					{
+						sign_check(&flg, &num, &w_nbr,&count);
+						ft_putnbr(num);
+						count += padding_option(&flg, w_nbr, num) + len + 1;
+					}
+					else if(flg.zero_flag ||flg.plus_flag && flg.zero_flag||flg.zero_flag && flg.space_flag)
+					{
+						sign_check(&flg, &num, &w_nbr,&count);
+						count += padding_option(&flg, w_nbr, num) + len + 1;
+						ft_putnbr(num);
+					}
+					else if(flg.plus_flag||flg.space_flag)
+					{
+						count += padding_option(&flg, w_nbr, num) + len + 1;
+						sign_check(&flg, &num, &w_nbr, &count);
+						ft_putnbr(num);
+					}
+					else
+					{
+						w_nbr -= len;
+						while(--w_nbr > 0)
+							count += ft_putchar(' ');
+						if(num >= 0)
+							ft_putchar(' ');
+						else
+						{
+							num *= -1;
+							ft_putchar('-');
+						}
+						ft_putnbr(num);
+						count += len + 1;
+
+					}
+				}
 				else
 				{
 					if(flg.plus_flag)
@@ -340,7 +282,7 @@ int	ft_printf(const char *fmt, ...)
 						if(num >= 0)
 							count += ft_putchar('+');
 						else
-						count++;
+							count++;
 						ft_putnbr(num);
 					}
 					else if(flg.space_flag)
@@ -377,14 +319,14 @@ int	ft_printf(const char *fmt, ...)
 int	main(void)
 {
 	/*  numbers test cases for %d and %i */
-	int num = 1000;
+	int num = +1000;
 	// int len1 = ft_printf("|%d|\n", num);
 	// int len2 = printf("|%d|\n", num);
 	// printf("my len: %d\n", len1);
 	// printf("og len: %d", len2);
 
-	int len1 = ft_printf("|%d|\n", num);
-	int len2 = printf("|%d|\n", num);
+	int len1 = ft_printf("|%000--++-+10d|\n", num);
+	int len2 = printf("|%000--++-+10d|\n", num);
 	printf("my len: %d\n", len1);
 	printf("og len: %d\n", len2);
 
@@ -531,49 +473,102 @@ int	main(void)
 
 
 
-		// if((w_nbr >=0 || flg.zero_flag) && p_nbr > len )
-				// {
-				// 	if(w_nbr > p_nbr)
-				// 		w_nbr -= p_nbr;
-				// 	else
-				// 		w_nbr = 0;
-				// 	p_nbr -= len;
-				// 	if(flg.minus_flag)
-				// 	{
-				// 		while(p_nbr-- > 0)
-				// 			count += ft_putchar('0');
-				// 		ft_putnbr(num);
-				// 		while(w_nbr-- > 0)
-				// 			count += ft_putchar(' ');
-				// 	}
-				// 	else
-				// 	{
-				// 		while(w_nbr-- > 0)
-				// 			count += ft_putchar(' ');
-				// 		while(p_nbr-- > 0)
-				// 			count += ft_putchar('0');
-				// 		ft_putnbr(num);						
-				// 	}
-				// 	count += len;
-				// }
-				// else if (w_nbr != -1 && w_nbr > len && num < 0)
-				// 	count += number_case_check_two(num, &flg, &w_nbr, len);
-				// else if (w_nbr != -1 && w_nbr > len)
-				// 	count += number_case_check_one(num, &flg, &w_nbr, len);
-				// else
-				// {
-				// 	if(num < 0)
-				// 		count++;
-				// 	if(flg.space_flag)
-				// 	{
-				// 		if(num > 0)
-				// 			count += ft_putchar(' ');
-				// 	}
-				// 	else if(flg.plus_flag)
-				// 	{
-				// 		if(num > 0)
-				// 			count += ft_putchar('+');
-				// 	}
-				// 	ft_putnbr(num);
-				// 	count += len;
-				// }
+// void sign_check(int num, t_format *flg)
+// {
+	
+// 	if(flg->plus_flag)
+// 	{
+// 		if(num >= 0)
+// 			ft_putchar('+');
+// 	}
+// 	else if(flg->space_flag)
+// 	{
+// 		if(num >= 0)
+// 			ft_putchar(' ');
+// 	}
+// }
+
+// int padding_option(t_format *flg, int w_nbr, int *num)
+// {
+// 	int count;
+// 	count = 0;
+
+// 	if(( flg->minus_flag || flg->plus_flag || flg-> space_flag ) && !flg->zero_flag)
+// 	{
+// 		while ((w_nbr)-- > 0)
+// 			count += ft_putchar(' ');
+// 	}
+// 	else if(flg->zero_flag && !flg->minus_flag)
+// 	{
+// 		if(*num < 0)
+// 		{
+// 			*num *= -1;
+// 			ft_putchar('-');
+// 		}	
+// 		while ((w_nbr)-- > 0)
+// 			count += ft_putchar('0');
+// 	}
+// 	else
+// 	{
+// 		while(w_nbr-- > 0)
+// 		count += ft_putchar(' ');		
+// 	}
+// 	return count;
+// }
+
+// int number_case_check_one(int w_nbr, int num, int len, t_format *flg, int count)
+// {
+// 	w_nbr -= len + 1;
+// 	if((flg->plus_flag && flg->minus_flag)||(flg->minus_flag && flg->space_flag))// correct
+// 	{
+// 		sign_check(num, flg);
+// 		ft_putnbr(num);
+// 		count += padding_option(flg, w_nbr, &num) + len;
+// 	}
+// 	else if(flg->space_flag ||(flg->plus_flag && flg->zero_flag)||(flg->zero_flag && flg->space_flag))// correct
+// 	{
+// 		sign_check(num, flg);
+// 		count += padding_option(flg, w_nbr, &num) + len;
+// 		ft_putnbr(num);
+// 	}
+// 	else if(flg->plus_flag && flg->space_flag || flg->plus_flag)
+// 	{
+// 		count += padding_option(flg, w_nbr, &num) + len;
+// 		sign_check(num, flg);
+// 		ft_putnbr(num);
+// 	}
+// 	else if(flg->zero_flag && flg->minus_flag || flg->minus_flag)
+// 	{
+// 		if(num >= 0)
+// 		{
+// 			w_nbr++;
+// 			count--;
+// 		}
+// 		ft_putnbr(num);
+// 		count += padding_option(flg, w_nbr, &num) + len;
+// 	}
+// 	else if(flg->zero_flag)
+// 	{
+// 		if(num >= 0)
+// 		{
+// 			w_nbr++;
+// 			count--;;
+// 		}
+// 		count += padding_option(flg, w_nbr, &num) + len;
+// 		ft_putnbr(num);
+// 	}
+// 	else if(flg->space_flag)
+// 	{
+// 		sign_check(num, flg);
+// 		count += padding_option(flg, w_nbr, &num) + len;
+// 		ft_putnbr(num);
+// 	}
+// 	else
+// 	{
+// 		if(num >= 0)
+// 			ft_putchar(' ');
+// 		count += padding_option(flg, w_nbr, &num) + len;
+// 		ft_putnbr(num);
+// 	}
+// 	return count;
+// }
