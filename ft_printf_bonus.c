@@ -1,5 +1,4 @@
 #include "ft_printf_bonus.h"
-#include <stdio.h>
 
 void	flag_check(const char *fmt, int *i, t_format *flag)
 {
@@ -102,31 +101,33 @@ int	string_case_check_three(const char *str, t_format *flg, int *w_nbr,
 /*----------------------------------------------------------------------------------------------*/
 /*format string %c */
 /*----------------------------------------------------------------------------------------------*/
-int	char_case_check(char c, t_format *flg, int w_nbr)
+/*----------------------------------------------------------------------------------------------*/
+/* format string %p
+/*----------------------------------------------------------------------------------------------*/
+void pointer_case_one(const char *str, t_format *flg, int w_nbr, int len, int *count, int zero)
 {
-	int	count;
-
-	count = 0;
-	if (flg->minus_flag == 1)
+	w_nbr -= 16;
+	if(flg->minus_flag)
 	{
-		count += ft_putchar(c);
-		while (--w_nbr > 0)
-			count += ft_putchar(' ');
+		while(zero-- > 0)
+			*count += ft_putchar('0');
+		while(len-- > 0)
+			*count += write(1, &str[len], 1);
+		while(w_nbr-- > 0)
+			*count += ft_putchar(' ');
 	}
 	else
 	{
-		while (--w_nbr > 0)
-			count += ft_putchar(' ');
-		count += ft_putchar(c);
+		while(w_nbr-- > 0)
+			*count += ft_putchar(' ');
+		while(zero-- > 0)
+			*count += ft_putchar('0');
+		while(len-- > 0)
+			*count += write(1, &str[len], 1);
 	}
-	return (count);
 }
 /*----------------------------------------------------------------------------------------------*/
-/* format string %d and %i*/
-/*----------------------------------------------------------------------------------------------*/
-
-/*----------------------------------------------------------------------------------------------*/
-
+#include <stdio.h>
 int	ft_printf(const char *fmt, ...)
 {
 	va_list		list;
@@ -161,6 +162,7 @@ int	ft_printf(const char *fmt, ...)
 					p_nbr = (p_nbr * 10 + (fmt[i++] - '0'));
 			}
 			if (fmt[i] == 'c')
+				// c_specifier(&flg,fmt, list, &count, w_nbr);
 			{
 				c = va_arg(list, int);
 				if (w_nbr != -1)
@@ -203,6 +205,106 @@ int	ft_printf(const char *fmt, ...)
 				else
 					count += else_case_number_format(&flg, num, len);
 			}
+			else if(fmt[i] == 'u')
+			{
+				num = va_arg(list, unsigned int);
+				len = unsigned_num_len(num);
+				if(w_nbr > len && p_nbr > len)
+				{
+					if(w_nbr <= p_nbr)
+						count += unsigned_number_case_two(&flg, len, num, p_nbr);
+					else
+						count += unsigned_number_case_three(&flg, len, num, p_nbr, w_nbr);
+				}
+				else if(w_nbr > len && w_nbr != -1)
+					count += unsigned_number_case_one(&flg, len, num, w_nbr);
+				else if(p_nbr > len && p_nbr != -1)
+					count += unsigned_number_case_two(&flg, len, num, p_nbr);
+				else
+					count += ft_putnbr_unsigned(num);
+			}
+			else if(fmt[i] == 'x')
+			{
+				num = va_arg(list, unsigned int);
+				char *str = return_hexvalue_lower(num);
+				len = ft_strlen(str);
+				if(w_nbr > len && p_nbr > len)
+				{
+					if(w_nbr <= p_nbr)
+						hexnumber_case_two(str, &flg, p_nbr, len, &count);
+					else
+						hexnumber_case_three(str, &flg, p_nbr, w_nbr, len, &count);
+				}
+				else if(w_nbr > len && w_nbr != -1)
+					hexnumber_case_one(str, &flg, w_nbr, len, &count);
+				else if(p_nbr > len && p_nbr != -1)
+					hexnumber_case_two(str, &flg, p_nbr, len, &count);
+				else
+				{
+					while (len-- > 0)
+        				count += write(1, &str[len], 1);
+				}
+			}
+			else if(fmt[i] == 'X')
+			{
+				num = va_arg(list, unsigned int);
+				char *str = return_hexvalue_upper(num);
+				len = ft_strlen(str);
+				if(w_nbr > len && p_nbr > len)
+				{
+					if(w_nbr <= p_nbr)
+						hexnumber_upper_case_two(str, &flg, p_nbr, len, &count);
+					else
+						hexnumber_upper_case_three(str, &flg, p_nbr, w_nbr, len, &count);
+				}
+				else if(w_nbr > len && w_nbr != -1)
+					hexnumber_upper_case_one(str, &flg, w_nbr, len, &count);
+				else if(p_nbr > len && p_nbr != -1)
+					hexnumber_upper_case_two(str, &flg, p_nbr, len, &count);
+				else
+				{
+					while (len-- > 0)
+        				count += write(1, &str[len], 1);
+				}
+			}
+			else if(fmt[i] == 'p') // ft_putstr("0X");//change this at 42
+			{
+				void *ptr = va_arg(list, void *);
+				int zero_padd;
+				char *str = return_address_and_convert_to_hex(ptr);
+				len = ft_strlen(str);
+				zero_padd = 16 - len;
+				if(w_nbr > len + zero_padd && w_nbr != -1)
+					pointer_case_one(str,&flg,w_nbr,len,&count,zero_padd);
+				else
+				{			
+					while(zero_padd-- > 0)
+						count += ft_putchar('0');
+					while(len-- > 0)
+						count += write(1, &str[len], 1);
+				}
+			}
+			else if(fmt[i] == '%')
+			{
+				if(w_nbr > len &&  w_nbr != -1)
+				{
+					w_nbr -= len;
+					if(flg.minus_flag)
+					{
+						count += ft_putchar('%');
+						while(w_nbr-- > 0)
+							count += ft_putchar(' ');
+					}
+					else
+					{
+						while(w_nbr-- > 0)
+							count += ft_putchar(' ');
+						count += ft_putchar('%');
+					}
+				}
+				else
+					count += ft_putchar('%');
+			}
 			i++;
 		}
 		else
@@ -216,15 +318,39 @@ int	ft_printf(const char *fmt, ...)
 	va_end(list);
 	return (count);
 }
+#include <stdio.h>
 int	main(void)
 {
 	/*  numbers test cases for %d and %i */
-	int num =  +1000;
-	int num1 = -1000;
-	// int len1 = ft_printf("|%d|\n", num);
-	// int len2 = printf("|%d|\n", num);
+	// int num =  -10;
+	// int num1 = 10;
+	// int *ptr = &num;
+	// int *ptr1 = &num1;
+
+	// char *str = "helloo";
+	// char *str1 = "welcome";
+	// char *ptr = str;
+	// char *ptr1 = str1;
+	// int len1 = ft_printf("|%#0 p|\n", ptr);
+	// int len2 = printf("|%#0 p|\n", ptr);
+	// int len3 = ft_printf("|%#0 p|\n", ptr1);
+	// int len4 = printf("|%#0 p|\n", ptr1);
+
 	// printf("my len: %d\n", len1);
-	// printf("og len: %d", len2);
+	// printf("og len: %d\n", len2);
+	// printf("my len: %d\n", len3);
+	// printf("og len: %d\n", len4);
+
+	// int len1 = ft_printf("|%25.20d|\n", num);
+	// int len2 = printf("|%25.20d|\n", num);
+	// int len3 = ft_printf("|%25.20d|\n", num1);
+	// int len4 = printf("|%25.20d|\n", num1);
+
+	// printf("my len: %d\n", len1);
+	// printf("og len: %d\n", len2);
+	// printf("my len: %d\n", len3);
+	// printf("og len: %d\n", len4);
+
 	// char	*str = "yelukmnsdjknvskjdnckjdsnckjdsncnkjcndskjcndseee";
 	// char 	c = 'a';
 
@@ -257,15 +383,15 @@ int	main(void)
 	/*  string  and character test cases for %c and %s */
 
 	
-	// char	c = 'c';
+	char	c = 'c';
 
-	// int len1 = ft_printf("|%-10c word %10c word %10c|\n", c, c, c);
-	// int len2 = printf("|%-10c word %10c word %10c|\n", c, c, c);
-	// printf("%d\n", len);
-	// printf("%d\n", len1);
+	int len1 = ft_printf("|%-10c word %10c word %10c|\n", c, c, c);
+	int len2 = printf("|%-10c word %10c word %10c|\n", c, c, c);
+	printf("%d\n", len1);
+	printf("%d\n", len2);
 
-	// int len1 = ft_printf("||%-10.5s||%-0.0s||%-10c||%-10c|||%10.5d||%10.5i||%10.5d||%10.5i|\n", str, str, c,c,num,num,num1,num1);
-	// int len2 = printf("||%-10.5s||%-0.0s||%-10c||%-10c|||%10.5d||%10.5i||%10.5d||%10.5i|\n", str, str, c,c,num,num,num1,num1);
+	// int len1 = ft_printf("|%+10.5d||%+10.5i||%+10.5d||%+10.5i||%+10.5u||%+10.5u||%+10.5c||%+10.5s|\n", num,num,num1,num1,num,num1,c,str);
+	// int len2 = printf("|%+10.5d||%+10.5i||%+10.5d||%+10.5i||%+10.5u||%+10.5u||%+10.5c||%+10.5s|\n", num,num,num1,num1,num, num1,c,str);
 	// printf("mine test 1:  %d\n", len1);
 	// printf("original test 1:  %d\n", len2);
 

@@ -1,4 +1,3 @@
-
 #include "ft_printf_bonus.h"
 
 int padding_width(int w_nbr)
@@ -32,7 +31,7 @@ int zero_case_number_format(int p_nbr, int w_nbr, int count, t_format *flg, int 
 }
 int else_case_number_format2(int p_nbr, int w_nbr, int count, t_format *flg, int num, int len)
 {
-	if(num >= 0)
+    if(num >= 0)
 	{
 		w_nbr++;
 		count--;

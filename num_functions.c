@@ -47,3 +47,18 @@ int	num_len(int n)
 	}
 	return (count);
 }
+
+int	unsigned_num_len(unsigned int n)
+{
+	int	count;
+
+	count = 0;
+	if (n == 0)
+		return (1);
+	while (n != 0)
+	{
+		n /= 10;
+		count++;
+	}
+	return (count);
+}

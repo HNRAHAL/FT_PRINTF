@@ -115,4 +115,3 @@ void single_flag_combination_check(t_format *flg, int w_nbr, int len, int num, i
 		ft_putnbr(num);
 	}
 }
-

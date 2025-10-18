@@ -1,5 +1,4 @@
 #include "ft_printf_bonus.h"
-#include <stdio.h>
 int number_format_case_one(int w_nbr, int count, t_format *flg, int num, int len)
 {
 	count = 1;
@@ -55,7 +54,7 @@ int number_format_case_three(int p_nbr, int w_nbr, int count, t_format *flg, int
 {
 	count = 1;
 	w_nbr -= p_nbr;
-	p_nbr -= w_nbr - 1;
+	p_nbr -= len;
 	if(flg->plus_flag && flg->minus_flag || flg->space_flag && flg->minus_flag || flg->minus_flag)
 	{
 		positive_case(num, flg, &count, &w_nbr);
